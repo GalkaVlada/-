@@ -1,0 +1,223 @@
+from tkinter import *
+from tkinter import messagebox
+from random import *
+from tkinter import Tk
+
+#робочий простір для малювання і його розмір
+canvas_width =700
+canvas_height =500
+
+# вікно програми редактора
+root =Tk()
+root.title('VVG_Editor')
+root.iconbitmap('logo.ico')
+#розміри пензликів
+brush_size = 4
+color = "black" 
+pc = False
+
+#функція малювання
+fl = 0
+def paint(event):
+    global fl
+    if fl > 0:
+        paintp(event)
+        return 0
+    else:
+        #створюю овал(форма пензлика)
+        #fill = color - заливка, outline= color - обводка
+        global brush_size
+        global color
+        x1 = event.x - brush_size
+        x2 = event.x + brush_size
+        y1 = event.y - brush_size
+        y2 = event.y + brush_size
+        w.create_oval(x1,y1,x2,y2, fill = color, outline= color)
+
+
+#створення лінії
+def paintp(event):
+    global pc
+    global fl
+    global color
+    if fl == 1:
+        pc = (event.x, event.y)
+        fl = 2
+        return 0
+    if fl == 2:
+        w.create_line(*pc, event.x, event.y,fill = color,width=brush_size)
+        pc = 0
+        fl = 0
+        return 0
+
+#створення прямокутника
+fl2= 0
+
+def painpr(event):
+    global pc
+    global fl2
+    if fl2 == 1:
+        pc = (event.x, event.y)
+        fl2 = 2
+        return 0
+    if fl2 == 2:
+        w.create_rectangle(*pc, event.x, event.y,fill = color)
+        fl2 = 0
+        return 0
+
+#створення трикутника
+fl3= 0
+
+def paintr(event):
+    global pc
+    global fl3
+    if fl3 == 1:
+        pc = [event.x, event.y]
+        fl3 = 2
+        return 0
+    if fl3 == 2:
+        pc.append(event.x)
+        pc.append(event.y)
+        fl3 = 3
+        return 0
+    if fl3 == 3:
+        w.create_polygon(*pc, event.x, event.y,fill = color)
+        fl3 = 0
+        return 0
+
+#створення кола
+fl4= 0
+def painov(event):
+    global pc
+    global fl4
+    if fl4 == 1:
+        pc = (event.x, event.y)
+        fl4 = 2
+        return 0
+    if fl4 == 2:
+        w.create_oval(*pc, event.x, event.y,fill = color)
+        pc = 0
+        fl4 = 0
+        return 0
+
+
+#функція зміни кольору пензлика
+def color_change(new_color):
+    global color
+    color = new_color
+
+# робочий простір для малювання
+w = Canvas(root, width=canvas_width, height=canvas_height, bg ='white')
+
+
+def gldraw(event):
+    global fl
+    global fl2
+    if fl > 0:
+        paintp(event)
+    if fl2 > 0:
+        painpr(event)
+    if fl3 > 0:
+        paintr(event)
+    if fl4 > 0:
+        painov(event)
+
+# cлідування за компьютерною мишою
+w.bind('<B1-Motion>', paint)
+w.bind('<Button-1>', gldraw)
+
+
+root.update()
+#збереження картинки
+def save():
+    filename= w.postscript(file=f'image_{randint(0, 10000)}.ps',colormode="color")
+    messagebox.showinfo('Збережено',"Файл збережено")
+
+
+clear_btn= Button(text="Del", width=5, command=lambda:w.delete("all"))
+white_btn= Button(text="Ластик", width=5, command=lambda: color_change("white"))
+red_btn= Button(text="", bg='#e8151e', width=3, command=lambda: color_change("#e8151e"))
+blue_btn= Button(text="",bg='#3e8fc2', width=3, command=lambda: color_change("#3e8fc2"))
+yellow_btn= Button(text="",bg='#f9f342', width=3, command=lambda: color_change("#f9f342"))
+
+org_btn= Button(text="", bg='#fc9017', width=3, command=lambda: color_change("#fc9017"))
+drkgrin_btn= Button(text="",bg='#47a207', width=3, command=lambda: color_change("#47a207"))
+lighhtgrin_btn= Button(text="",bg='#08c78e', width=3, command=lambda: color_change("#08c78e"))
+prpl_btn= Button(text="", bg='#32305c', width=3, command=lambda: color_change("#32305c"))
+pink_btn= Button(text="",bg='#bf6567', width=3, command=lambda: color_change("#bf6567"))
+black_btn= Button(text="",bg='black', width=3, command=lambda: color_change("black"))
+
+save_btn= Button(text="Save",bg='#e3ded4', width=5, command=save)
+
+w.grid(row=2, column=0, columnspan=10, padx=5, pady=10, sticky=E+W+S+N)
+w.columnconfigure(5,weight=1)
+w.rowconfigure(1, weight=1)
+
+#координати курсора
+x = root.winfo_pointerx()
+y = root.winfo_pointery()
+abs_coord_x = root.winfo_pointerx() - root.winfo_rootx()
+abs_coord_y = root.winfo_pointery() - root.winfo_rooty()
+
+#відмальовка фігур
+
+null = False
+def ln():
+    global fl
+    if fl == 0:
+        fl = 1
+
+def pr():
+    global fl2
+    if fl2 == 0:
+        fl2 = 1   
+
+def tr():
+    global fl3
+    if fl3 == 0:
+        fl3 = 1   
+def ov():
+    global fl4
+    if fl4 == 0:
+        fl4 = 1  
+
+
+line_btn = Button(text="Лінія",bg='white', width=5, command=ln)
+rectangle_btn= Button(text="Пр-ник",bg='white', width=8,command=pr)
+pol_btn= Button(text="Трикутник",bg='white', width=8, command=tr)
+oval_btn= Button(text="Коло",bg='white', width=5, command=ov)
+
+
+def size_paint():
+    global brush_size
+    brush_size=int(entry.get())
+
+entry = Entry()
+entry.grid(row=1, column=7)
+entry.insert(0,"4")
+btn_ok = Button(text="ok",command=size_paint)
+btn_ok.grid(row=1, column=8)
+
+#відображення кнопок
+
+
+red_btn.grid(row=0, column=0)
+blue_btn.grid(row=0, column=1)
+yellow_btn.grid(row=0, column=2)
+org_btn.grid(row=0, column=3)
+drkgrin_btn.grid(row=0, column=4)
+lighhtgrin_btn.grid(row=0, column=5)
+prpl_btn.grid(row=0, column=6)
+pink_btn.grid(row=0, column=7)
+black_btn.grid(row=0, column=8)
+
+save_btn.grid(row=1, column=0)
+clear_btn.grid(row=1, column=1)
+white_btn.grid(row=1, column=2)
+line_btn.grid(row=1, column=3)
+rectangle_btn.grid(row=1, column=4)
+pol_btn.grid(row=1, column=5)
+oval_btn.grid(row=1, column=6)
+
+#запуск вікна
+root.mainloop()
